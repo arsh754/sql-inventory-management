@@ -3,117 +3,244 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from db import create_connection
 
+# ================= LOGIN STATE =================
+
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+
+
+def login(username, password):
+
+    connection = create_connection()
+
+    cursor = connection.cursor()
+
+    query = """
+    SELECT *
+    FROM users
+    WHERE username = %s
+    AND password = %s
+    """
+
+    cursor.execute(query, (username, password))
+
+    user = cursor.fetchone()
+
+    connection.close()
+
+    return user
+
 st.set_page_config(
     page_title="Inventory Dashboard",
     layout="wide"
 )
+# ================= LOGIN PAGE =================
 
-st.title("📦 Smart Inventory Management System")
+if not st.session_state.logged_in:
 
-# Sidebar
-st.sidebar.title("Navigation")
+    st.title("🔐 Inventory System Login")
 
-page = st.sidebar.radio(
-    "Go to",
-    ["Dashboard", "Products", "Analytics"]
-)
+    username = st.text_input("Username")
 
-connection = create_connection()
-
-# ================= DASHBOARD =================
-if page == "Dashboard":
-
-    st.header("📊 Dashboard Overview")
-
-    cursor = connection.cursor()
-
-    # Revenue
-    cursor.execute(
-        "SELECT SUM(total_amount) FROM orders"
+    password = st.text_input(
+        "Password",
+        type="password"
     )
 
-    revenue = cursor.fetchone()[0]
+    if st.button("Login"):
 
-    # Product count
-    cursor.execute(
-        "SELECT COUNT(*) FROM products"
+        user = login(username, password)
+
+        if user:
+
+            st.session_state.logged_in = True
+
+            st.success("Login Successful!")
+
+            st.rerun()
+
+        else:
+
+            st.error("Invalid Username or Password")
+
+# ================= MAIN DASHBOARD =================
+else:
+     st.title("📦 Smart Inventory Management System")
+
+    # Sidebar
+     st.sidebar.title("Navigation")
+
+     page = st.sidebar.radio(
+        "Go to",
+        ["Dashboard", "Products", "Analytics"]
     )
 
-    total_products = cursor.fetchone()[0]
+     connection = create_connection()
 
-    # Orders count
-    cursor.execute(
-        "SELECT COUNT(*) FROM orders"
-    )
+    # ================= DASHBOARD =================
+     if page == "Dashboard":
 
-    total_orders = cursor.fetchone()[0]
+        st.header("📊 Dashboard Overview")
 
-    col1, col2, col3 = st.columns(3)
+        cursor = connection.cursor()
 
-    col1.metric("💰 Revenue", f"₹{revenue}")
-    col2.metric("📦 Products", total_products)
-    col3.metric("🛒 Orders", total_orders)
+        # Revenue
+        cursor.execute(
+            "SELECT SUM(total_amount) FROM orders"
+        )
 
-# ================= PRODUCTS =================
-elif page == "Products":
+        revenue = cursor.fetchone()[0]
 
-    st.header("📦 Product Inventory")
+        # Product count
+        cursor.execute(
+            "SELECT COUNT(*) FROM products"
+        )
 
-    query = "SELECT * FROM products"
-    df = pd.read_sql(query, connection)
+        total_products = cursor.fetchone()[0]
 
-    st.dataframe(df)
+        # Orders count
+        cursor.execute(
+            "SELECT COUNT(*) FROM orders"
+        )
 
-# ================= ANALYTICS =================
-elif page == "Analytics":
+        total_orders = cursor.fetchone()[0]
 
-    st.header("📈 Sales Analytics")
+        col1, col2, col3 = st.columns(3)
 
-    # Top selling products
-    query = """
-    SELECT products.name,
-           SUM(order_items.quantity) AS total_sold
-    FROM order_items
-    JOIN products
-    ON order_items.product_id = products.product_id
-    GROUP BY products.name
-    ORDER BY total_sold DESC
-    """
+        col1.metric("💰 Revenue", f"₹{revenue}")
+        col2.metric("📦 Products", total_products)
+        col3.metric("🛒 Orders", total_orders)
 
-    sales_df = pd.read_sql(query, connection)
+    # ================= PRODUCTS =================
+     elif page == "Products":
 
-    st.subheader("Top Selling Products")
+        st.header("📦 Product Inventory")
 
-    st.dataframe(sales_df)
+        # ================= ADD PRODUCT =================
+        st.subheader("➕ Add New Product")
 
-    # Chart
-    fig, ax = plt.subplots()
+        with st.form("product_form"):
 
-    ax.bar(
-        sales_df["name"],
-        sales_df["total_sold"]
-    )
+            name = st.text_input("Product Name")
+            category = st.text_input("Category")
+            price = st.number_input(
+                "Price",
+                min_value=0.0
+            )
 
-    ax.set_xlabel("Products")
-    ax.set_ylabel("Units Sold")
-    ax.set_title("Top Selling Products")
+            stock = st.number_input(
+                "Stock Quantity",
+                min_value=0
+            )
 
-    st.pyplot(fig)
+            # Fetch suppliers
+            cursor = connection.cursor()
 
-    # Low stock alerts
-    low_stock_query = """
-    SELECT name, stock_quantity
-    FROM products
-    WHERE stock_quantity < 10
-    """
+            cursor.execute(
+                "SELECT supplier_id, supplier_name FROM suppliers"
+        )
 
-    low_stock_df = pd.read_sql(
-        low_stock_query,
-        connection
-    )
+            suppliers = cursor.fetchall()
 
-    st.subheader("⚠️ Low Stock Alerts")
+            supplier_dict = {
+                supplier[1]: supplier[0]
+                for supplier in suppliers
+        }
 
-    st.dataframe(low_stock_df)
+            selected_supplier = st.selectbox(
+                "Select Supplier",
+                list(supplier_dict.keys())
+        )
 
-connection.close()
+            supplier_id = supplier_dict[selected_supplier]
+
+            submit = st.form_submit_button(
+                "Add Product"
+            )
+
+            if submit:
+
+                cursor = connection.cursor()
+
+                query = """
+                INSERT INTO products
+                (name, category, price, stock_quantity, supplier_id)
+                VALUES (%s, %s, %s, %s, %s)
+                """
+
+                values = (
+                    name,
+                    category,
+                    price,
+                    stock,
+                    supplier_id
+                )
+
+                cursor.execute(query, values)
+
+                connection.commit()
+
+                st.success("✅ Product Added Successfully!")
+
+        # ================= VIEW PRODUCTS =================
+        st.subheader("📋 Available Products")
+
+        query = "SELECT * FROM products"
+
+        df = pd.read_sql(query, connection)
+
+        st.dataframe(df)
+
+    # ================= ANALYTICS =================
+     elif page == "Analytics":
+
+        st.header("📈 Sales Analytics")
+
+        # Top selling products
+        query = """
+        SELECT products.name,
+            SUM(order_items.quantity) AS total_sold
+        FROM order_items
+        JOIN products
+        ON order_items.product_id = products.product_id
+        GROUP BY products.name
+        ORDER BY total_sold DESC
+        """
+
+        sales_df = pd.read_sql(query, connection)
+
+        st.subheader("Top Selling Products")
+
+        st.dataframe(sales_df)
+
+        # Chart
+        fig, ax = plt.subplots()
+
+        ax.bar(
+            sales_df["name"],
+            sales_df["total_sold"]
+        )
+
+        ax.set_xlabel("Products")
+        ax.set_ylabel("Units Sold")
+        ax.set_title("Top Selling Products")
+
+        st.pyplot(fig)
+
+        # Low stock alerts
+        low_stock_query = """
+        SELECT name, stock_quantity
+        FROM products
+        WHERE stock_quantity < 10
+        """
+
+        low_stock_df = pd.read_sql(
+            low_stock_query,
+            connection
+        )
+
+        st.subheader("⚠️ Low Stock Alerts")
+
+        st.dataframe(low_stock_df)
+
+     connection.close()
