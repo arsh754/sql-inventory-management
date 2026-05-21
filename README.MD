@@ -1,107 +1,215 @@
 # 📦 Smart Inventory Management System
 
-A full-stack inventory and sales management system built using Python, MySQL, and Streamlit.
+A full-stack inventory and sales management system built using **Python, MySQL, and Streamlit**.  
+The project automates inventory tracking, order processing, stock management, and sales analytics through an interactive dashboard interface.
 
-## 🚀 Features
+---
 
-- Product inventory management
+# 🚀 Features
+
+## 🔐 Authentication System
+- Secure admin login
+- Protected dashboard access
+- Session-based authentication
+- Logout functionality
+
+---
+
+## 📦 Inventory Management
 - Add new products dynamically
-- Order placement system
-- Automatic stock updates
-- Sales analytics dashboard
-- Revenue tracking
-- Low stock alerts
-- Interactive Streamlit UI
+- View all available inventory
+- Real-time stock tracking
+- Supplier integration using relational database mapping
 
 ---
 
-## 🛠️ Tech Stack
-
-- Python
-- MySQL
-- Streamlit
-- Pandas
-- Matplotlib
+## 🛒 Order Management
+- Place customer orders
+- Automatic stock reduction after purchase
+- Multi-table relational order processing
+- Order tracking using foreign key relationships
 
 ---
 
-## 📊 Dashboard Features
-
-### Dashboard Overview
-- Total revenue
-- Product count
-- Orders count
-
-### Product Management
-- View inventory
-- Add products
-- Track stock quantity
-
-### Analytics
-- Top selling products
-- Sales visualization
-- Low stock alerts
+## 📊 Sales Analytics Dashboard
+- Total revenue tracking
+- Product inventory overview
+- Order statistics
+- Top-selling products visualization
+- Low-stock alerts
+- Interactive analytics charts
 
 ---
 
-## 📸 Screenshots
+# 🛠️ Tech Stack
 
-### Dashboard
+| Technology | Purpose |
+|---|---|
+| Python | Backend Logic |
+| MySQL | Relational Database |
+| Streamlit | Dashboard UI |
+| Pandas | Data Handling |
+| Matplotlib | Data Visualization |
+
+---
+
+# 🧠 Key Concepts Implemented
+
+- Relational Database Design
+- Foreign Keys & Relationships
+- CRUD Operations
+- SQL JOIN Queries
+- Session Authentication
+- Backend Business Logic
+- Inventory Automation
+- Interactive Dashboard Development
+- Data Analytics & Visualization
+
+---
+
+# 📂 Project Structure
+
+```text
+sql-inventory-management/
+│
+├── database/
+│   ├── schema.sql
+│   └── queries.sql
+│
+├── python/
+│   ├── app.py
+│   ├── dashboard.py
+│   ├── db.py
+│   └── inventory.py
+│
+├── screenshots/
+│
+├── README.md
+└── requirements.txt
+```
+
+---
+
+# 📸 Screenshots
+
+## 🔐 Login Page
+![Login](screenshots/login.png)
+
+---
+
+## 📊 Dashboard Overview
 ![Dashboard](screenshots/dashboard.png)
 
-### Analytics
-![Analytics](screenshots/analytics.png)
+---
 
-### Products
-![Products](screenshots/product.png)
+## 📦 Product Management
+![Products](screenshots/products.png)
 
 ---
 
-## ⚙️ Installation
+## 📈 Sales Analytics
+![Analytics](screenshots/analytics.png)
 
-### Clone Repository
+---
+
+# ⚙️ Installation Guide
+
+## 1️⃣ Clone Repository
 
 ```bash
 git clone https://github.com/YOUR_USERNAME/sql-inventory-management.git
 cd sql-inventory-management
 ```
 
-### Install Dependencies
+---
+
+## 2️⃣ Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run Streamlit App
+---
 
-```bash
-streamlit run python/dashboard.py
+## 3️⃣ Configure MySQL Database
+
+Create database using MySQL Workbench:
+
+```sql
+CREATE DATABASE inventory_system;
+```
+
+Run the provided schema file:
+
+```text
+database/schema.sql
 ```
 
 ---
 
-## 🧠 Concepts Used
+## 4️⃣ Update Database Credentials
 
-- Relational Database Design
-- Foreign Keys
-- SQL JOIN Queries
-- CRUD Operations
-- Business Logic Automation
-- Data Analytics
-- Dashboard Development
+Inside:
+
+```text
+python/db.py
+```
+
+Update:
+
+```python
+host="localhost",
+user="root",
+password="YOUR_PASSWORD",
+database="inventory_system"
+```
 
 ---
 
-## 📌 Future Improvements
+## 5️⃣ Run Streamlit Dashboard
 
-- Authentication system
-- Customer management
-- Invoice generation
-- Export reports as PDF
+```bash
+python3 -m streamlit run python/dashboard.py
+```
+
+---
+
+# 🔑 Demo Credentials
+
+```text
+Username: admin
+Password: admin123
+```
+
+---
+
+# 📈 Future Improvements
+
+- Password hashing & encryption
+- Role-based access control
+- Invoice PDF generation
+- Customer management system
+- REST API integration
+- Docker deployment
 - AI demand forecasting
+- Cloud deployment
 
 ---
 
-## 👨‍💻 Author
+# 💡 Why This Project Matters
+
+This project demonstrates:
+- Real-world database management
+- Backend system architecture
+- Business workflow automation
+- Dashboard development
+- Data analytics integration
+- Authentication implementation
+
+Unlike basic CRUD projects, this system simulates a practical inventory and sales workflow used in real businesses.
+
+---
+
+# 👨‍💻 Author
 
 Arsh Kumar
